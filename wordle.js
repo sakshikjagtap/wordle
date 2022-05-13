@@ -2,8 +2,16 @@ const fs = require('fs');
 
 const lettersStatus = function (word, guess) {
   const result = [];
+
   for (let index = 0; index < guess.length; index++) {
-    result.push(['a', 'correct']);
+    let status = 'absent';
+    if (word[index] === guess[index]) {
+      status = 'correct';
+    }
+    else if (word.includes(guess[index])) {
+      status = 'present';
+    }
+    result.push([guess[index], status]);
   }
   return result;
 };
@@ -64,26 +72,42 @@ const generatePage = function (table, message, templateAsString) {
 
 const getMessage = function (data, guess) {
   if (data.word === guess) {
+    data.isGameOver = true;
     return 'CONGRAGULATIONS!!! You got it right';
   }
   if (data.guessedWords.length === 6) {
-    return 'OOPS!!! Better luck next time. Correct word was' + data.word;
+    data.isGameOver = true;
+    return 'OOPS!!! Better luck next time. Correct word was ' + data.word;
   }
   return '';
 };
 
-const main = function (guess, file, template) {
-  let data = JSON.parse(readFile(file));
+const isWordInvalid = function (word, validWords) {
+  return word.length !== 5 || !validWords.includes(word);
+};
+
+const main = function (guess, dataFile, template, wordsFile) {
+  const validWords = readFile(wordsFile);
+  if (isWordInvalid(guess, validWords)) {
+    console.log('Please enter 5 letter valid word');
+    return;
+  }
+
+  let data = JSON.parse(readFile(dataFile));
   const templateAsString = readFile(template);
   let prevAttempts = data.guessedWords;
 
   const wordResult = lettersStatus(data.word, guess);
   prevAttempts = appendGuessedWord(prevAttempts, wordResult);
-  writeToJson(file, data);
 
   const message = getMessage(data, guess);
+  writeToJson(dataFile, data);
   const webpage = generatePage(wordleTable(prevAttempts), message, templateAsString);
   writeToFile('./index.html', webpage);
 }
 
-main(process.argv[2], './resources/data.json', './resources/template.html');
+const dataFile = './resources/data.json';
+const template = './resources/template.html';
+const wordsFile = './resources/words.txt';
+
+main(process.argv[2], dataFile, template, wordsFile);
