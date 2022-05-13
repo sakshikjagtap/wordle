@@ -31,7 +31,7 @@ const main = function (guess, file) {
   const wordResult = lettersStatus(data.word, guess);
   data.guessedWords = appendGuessedWord(data.guessedWords, wordResult);
   writeToJson(file, data);
-  writeToFile('./wordle.html', generatePage(data));
+  writeToFile('./index.html', generatePage(data));
 }
 
 main(process.argv[2], './data.json');
