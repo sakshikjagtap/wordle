@@ -10,7 +10,7 @@ const randomWord = list => list[randomInt(list.length)];
 
 const writeToFile = function (word, file) {
   const data = {
-    'word': word,
+    'word': word.toLowerCase(),
     'guessedWords': []
   };
   fs.writeFileSync(file, JSON.stringify(data), 'utf8');
