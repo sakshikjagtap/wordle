@@ -22,7 +22,7 @@ const writeToFile = function (file, content) {
 };
 
 const generatePage = function (data) {
-  const html = "<h1>wordle</h1>";
+  const html = '<head><link rel = "stylesheet" href = "style.css"></head><body><h1 class="blue">wordle</h1></body >';
   return html;
 };
 
