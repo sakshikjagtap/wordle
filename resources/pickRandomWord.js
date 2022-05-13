@@ -19,7 +19,7 @@ const writeToFile = function (word, file) {
 const main = function () {
   const words = readWords('/usr/share/dict/words');
   const fiveLetterWords = words.filter(isFiveLetterWord);
-  writeToFile(randomWord(fiveLetterWords), './data.json');
+  writeToFile(randomWord(fiveLetterWords), './resources/data.json');
 };
 
 main();

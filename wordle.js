@@ -22,7 +22,7 @@ const writeToFile = function (file, content) {
 };
 
 const generatePage = function (data) {
-  const html = '<head><link rel = "stylesheet" href = "style.css"></head><body><h1 class="blue">wordle</h1></body >';
+  const html = '<head><link rel = "stylesheet" href = "resources/style.css"></head><body><h1 class="blue">wordle</h1></body >';
   return html;
 };
 
@@ -34,4 +34,4 @@ const main = function (guess, file) {
   writeToFile('./index.html', generatePage(data));
 }
 
-main(process.argv[2], './data.json');
+main(process.argv[2], './resources/data.json');
