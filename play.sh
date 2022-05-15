@@ -9,3 +9,5 @@ do
     open index.html
     gameStatus=$( cat ./resources/data.json | grep 'isGameOver' | grep 'false' )
 done
+
+rm -r resources/data.json
