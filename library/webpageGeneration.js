@@ -1,5 +1,5 @@
 const { updateGameData, readFile, readJSON, writeFile, writeJson } = require('./dataModifiers.js');
-const { isWordValid } = require('./guessValidation.js');
+const { isWordValid } = require('./wordValidation.js');
 
 const getMessage = function (data, guess) {
   if (data.word === guess) {

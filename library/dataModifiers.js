@@ -1,4 +1,4 @@
-const { lettersValidation } = require('./guessValidation');
+const { lettersValidation } = require('./wordValidation.js');
 
 const fs = require('fs');
 const stringify = JSON.stringify;
