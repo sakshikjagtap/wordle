@@ -1,21 +1,14 @@
-const fs = require('fs');
-const stringify = JSON.stringify;
-const parse = JSON.parse;
+const { updateGameData, readFile, readJSON, writeFile, writeJson } = require('./dataModifiers.js');
+const { isWordValid } = require('./guessValidation.js');
 
-const lettersValidation = function (word, guess) {
-  const result = [];
-
-  for (let index = 0; index < guess.length; index++) {
-    let status = 'absent';
-    if (word[index] === guess[index]) {
-      status = 'correct';
-    }
-    else if (word.includes(guess[index])) {
-      status = 'present';
-    }
-    result.push([guess[index], status]);
+const getMessage = function (data, guess) {
+  if (data.word === guess) {
+    return 'CONGRAGULATIONS!!! You got it right';
   }
-  return result;
+  if (data.guessedWords.length === 6) {
+    return 'OOPS!!! Better luck next time. Correct word was ' + data.word;
+  }
+  return '';
 };
 
 const generateTag = function (tag, content, property) {
@@ -24,18 +17,6 @@ const generateTag = function (tag, content, property) {
     style = ' class="' + property + '"';
   }
   return '<' + tag + style + '>' + content + '</' + tag + '>';
-};
-
-const readFile = filePath => fs.readFileSync(filePath, 'utf8');
-
-const readJSON = file => parse(fs.readFileSync(file));
-
-const writeJson = function (file, content) {
-  fs.writeFileSync(file, stringify(content), 'utf8');
-};
-
-const writeFile = function (file, content) {
-  fs.writeFileSync(file, content, 'utf8');
 };
 
 const generateLetter = function ([letter, status]) {
@@ -75,35 +56,6 @@ const generatePage = function (data, guess, templateAsString) {
   const wordleChart = gameChart(data.guessedWords);
   let webpage = templateAsString.replace(/_GUESSED-WORDS_/, wordleChart);
   return webpage.replace(/_MESSAGE_/, message);
-};
-
-const updateGameStatus = function (data, guess) {
-  if (data.word === guess || data.guessedWords.length === 6) {
-    data.isGameOver = true;
-  }
-  return data;
-};
-
-const getMessage = function (data, guess) {
-  if (data.word === guess) {
-    return 'CONGRAGULATIONS!!! You got it right';
-  }
-  if (data.guessedWords.length === 6) {
-    return 'OOPS!!! Better luck next time. Correct word was ' + data.word;
-  }
-  return '';
-};
-
-const isWordValid = function (word, validWords) {
-  return word.length === 5 && validWords.includes(word);
-};
-
-const updateGameData = function (data, guess) {
-  const wordResult = lettersValidation(data.word, guess);
-  data.guessedWords.push(wordResult);
-
-  data = updateGameStatus(data, guess);
-  return data;
 };
 
 const main = function (guess, dataFile, template, wordsFile) {
