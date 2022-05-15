@@ -1,4 +1,6 @@
 const fs = require('fs');
+const stringify = JSON.stringify;
+const parse = JSON.parse;
 
 const lettersValidation = function (word, guess) {
   const result = [];
@@ -26,22 +28,24 @@ const generateTag = function (tag, content, property) {
 
 const readFile = filePath => fs.readFileSync(filePath, 'utf8');
 
-const writeToJson = function (file, content) {
-  fs.writeFileSync(file, JSON.stringify(content), 'utf8');
-}
+const readJSON = file => parse(fs.readFileSync(file));
 
-const writeToFile = function (file, content) {
+const writeJson = function (file, content) {
+  fs.writeFileSync(file, stringify(content), 'utf8');
+};
+
+const writeFile = function (file, content) {
   fs.writeFileSync(file, content, 'utf8');
-}
+};
 
 const generateLetter = function ([letter, status]) {
   return generateTag('div', letter, status);
-}
+};
 
 const generateWord = function (letters) {
   const generatedLetters = letters.map(generateLetter).join('');
   return generateTag('div', generatedLetters, 'word');
-}
+};
 
 const emptyRow = function (numOfCells) {
   let row = '';
@@ -49,7 +53,7 @@ const emptyRow = function (numOfCells) {
     row += generateTag('div', '', '');
   }
   return generateTag('div', row, 'word');
-}
+};
 
 const emptyRows = function (numOfRows) {
   const rows = [];
@@ -109,14 +113,14 @@ const main = function (guess, dataFile, template, wordsFile) {
     return 0;
   }
 
-  let data = JSON.parse(readFile(dataFile));
+  let data = readJSON(dataFile);
   const templateAsString = readFile(template);
 
   data = updateGameData(data, guess);
-  const webpage = generatePage(data, guess, templateAsString);
+  writeJson(dataFile, data);
 
-  writeToJson(dataFile, data);
-  writeToFile('./index.html', webpage);
+  const webpage = generatePage(data, guess, templateAsString);
+  writeFile('./index.html', webpage);
 };
 
 const dataFile = './resources/data.json';
