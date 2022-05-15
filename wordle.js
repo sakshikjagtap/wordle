@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const lettersStatus = function (word, guess) {
+const lettersValidation = function (word, guess) {
   const result = [];
 
   for (let index = 0; index < guess.length; index++) {
@@ -16,12 +16,7 @@ const lettersStatus = function (word, guess) {
   return result;
 };
 
-const appendGuessedWord = function (guessedWords, wordResult) {
-  guessedWords.push(wordResult);
-  return guessedWords;
-};
-
-const generateTag = (tag, content, property) => {
+const generateTag = function (tag, content, property) {
   let style = '';
   if (property) {
     style = ' class="' + property + '"';
@@ -29,19 +24,26 @@ const generateTag = (tag, content, property) => {
   return '<' + tag + style + '>' + content + '</' + tag + '>';
 };
 
-const writeToJson = (file, content) =>
+const readFile = filePath => fs.readFileSync(filePath, 'utf8');
+
+const writeToJson = function (file, content) {
   fs.writeFileSync(file, JSON.stringify(content), 'utf8');
+}
 
-const writeToFile = (file, content) =>
+const writeToFile = function (file, content) {
   fs.writeFileSync(file, content, 'utf8');
+}
 
-const generateLetter = ([letter, status]) =>
-  generateTag('div', letter, status);
+const generateLetter = function ([letter, status]) {
+  return generateTag('div', letter, status);
+}
 
-const generateWord = letters =>
-  generateTag('div', letters.map(generateLetter).join(''), 'word');
+const generateWord = function (letters) {
+  const generatedLetters = letters.map(generateLetter).join('');
+  return generateTag('div', generatedLetters, 'word');
+}
 
-const emptyRow = numOfCells => {
+const emptyRow = function (numOfCells) {
   let row = '';
   for (let index = 0; index < numOfCells; index++) {
     row += generateTag('div', '', '');
@@ -49,7 +51,7 @@ const emptyRow = numOfCells => {
   return generateTag('div', row, 'word');
 }
 
-const emptyRows = numOfRows => {
+const emptyRows = function (numOfRows) {
   const rows = [];
   for (let index = 0; index < numOfRows; index++) {
     rows.push(emptyRow(5));
@@ -57,54 +59,65 @@ const emptyRows = numOfRows => {
   return rows;
 };
 
-const wordleTable = function (prevAttempts) {
+const gameChart = function (prevAttempts) {
   const generatedWords = prevAttempts.map(generateWord);
   const attemptsLeft = 6 - prevAttempts.length;
   const generatedEmptyRows = emptyRows(attemptsLeft);
   return generatedWords.concat(generatedEmptyRows).join('');
 };
 
-const readFile = filePath => fs.readFileSync(filePath, 'utf8');
+const generatePage = function (data, guess, templateAsString) {
+  const message = getMessage(data, guess);
+  const wordleChart = gameChart(data.guessedWords);
+  let webpage = templateAsString.replace(/_GUESSED-WORDS_/, wordleChart);
+  return webpage.replace(/_MESSAGE_/, message);
+};
 
-const generatePage = function (table, message, templateAsString) {
-  return templateAsString.replace(/_GUESSED-WORDS_/, table).replace(/_MESSAGE_/, message);
+const updateGameStatus = function (data, guess) {
+  if (data.word === guess || data.guessedWords.length === 6) {
+    data.isGameOver = true;
+  }
+  return data;
 };
 
 const getMessage = function (data, guess) {
   if (data.word === guess) {
-    data.isGameOver = true;
     return 'CONGRAGULATIONS!!! You got it right';
   }
   if (data.guessedWords.length === 6) {
-    data.isGameOver = true;
     return 'OOPS!!! Better luck next time. Correct word was ' + data.word;
   }
   return '';
 };
 
-const isWordInvalid = function (word, validWords) {
-  return word.length !== 5 || !validWords.includes(word);
+const isWordValid = function (word, validWords) {
+  return word.length === 5 && validWords.includes(word);
+};
+
+const updateGameData = function (data, guess) {
+  const wordResult = lettersValidation(data.word, guess);
+  data.guessedWords.push(wordResult);
+
+  data = updateGameStatus(data, guess);
+  return data;
 };
 
 const main = function (guess, dataFile, template, wordsFile) {
   const validWords = readFile(wordsFile);
-  if (isWordInvalid(guess, validWords)) {
-    console.log('Please enter 5 letter valid word');
-    return;
+  if (!isWordValid(guess, validWords)) {
+    console.log('Enter 5 letter valid word');
+    return 0;
   }
 
   let data = JSON.parse(readFile(dataFile));
   const templateAsString = readFile(template);
-  let prevAttempts = data.guessedWords;
 
-  const wordResult = lettersStatus(data.word, guess);
-  prevAttempts = appendGuessedWord(prevAttempts, wordResult);
+  data = updateGameData(data, guess);
+  const webpage = generatePage(data, guess, templateAsString);
 
-  const message = getMessage(data, guess);
   writeToJson(dataFile, data);
-  const webpage = generatePage(wordleTable(prevAttempts), message, templateAsString);
   writeToFile('./index.html', webpage);
-}
+};
 
 const dataFile = './resources/data.json';
 const template = './resources/template.html';
